@@ -13,6 +13,15 @@ type User struct {
 	Email       string `json:"email"`
 	DateCreated string `json:"date_created"`
 }
+type Global struct {
+	updatedBy string
+	createdBy string
+	deletedBy string
+
+	created string
+	updated string
+	deleted string
+}
 
 func (user *User) Validate() *errors.RestErr {
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
