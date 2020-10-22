@@ -4,8 +4,11 @@ import (
 	"fmt"
 
 	"github.com/Pawelek242/home_users-api/dataresources/mysql/users_db"
-	"github.com/Pawelek242/home_users-api/utils/date_utils"
 	"github.com/Pawelek242/home_users-api/utils/errors"
+)
+
+const (
+	queryInsertUser = "INSERT INTO users(first_name, last_name, email, date_created) VALUES(?, ?, ?, ?);"
 )
 
 var (
@@ -29,16 +32,25 @@ func (user *User) Get() *errors.RestErr {
 }
 
 func (user *User) Save() *errors.RestErr {
-	current := usersDB[user.ID]
-	if usersDB[user.ID] != nil {
-		if current.Email == user.Email {
-			return errors.NewBadRequest(fmt.Sprintf("This email %s has been already registered", user.Email))
-		}
-		return errors.NewBadRequest(fmt.Sprintf("This user %d already exist", user.ID))
+
+	stmt, err := users_db.Client.Prepare(queryInsertUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+	fmt.Printf("kupa")
+	insertResult, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	if err != nil {
+		return errors.NewInternalServerError(
+			fmt.Sprintf("error when trying to create user %s", err.Error()))
 	}
 
-	user.DateCreated = date_utils.GetNowString()
+	userID, err := insertResult.LastInsertId()
+	if err != nil {
+		return errors.NewInternalServerError(fmt.Sprintf("error when trying to save user "))
+	}
 
-	usersDB[user.ID] = user
+	user.ID = userID
+
 	return nil
 }
