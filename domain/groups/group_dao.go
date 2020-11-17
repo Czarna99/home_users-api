@@ -12,9 +12,11 @@ import (
 const (
 	errorNoRows      = "no rows in result set"
 	indexUniqueEmail = "email_UNIQUE"
-	queryGetGroup    = "SELECT id, group_name FROM group WHERE id=?"
-	queryInsertGroup = "INSERT INTO users_db.groups(group_name, date_created) VALUES(?, ?);" //TODO users_db.groups change for groups
+	queryGetGroup    = "SELECT id, group_name, privileges, date_created FROM users_db.groups WHERE id=?"
+	queryInsertGroup = "INSERT INTO users_db.groups(group_name, date_created, privileges) VALUES(?, ?, ?);" //TODO users_db.groups change for groups
 	indexUniqueName  = "group_name_UNIQUE"
+	queryUpdateGroup = "UPDATE users_db.groups SET group_name=?, privileges=? WHERE id=?;"
+	queryDeleteGroup = "DELETE FROM users_db.groups WHERE id=?"
 )
 
 var ()
@@ -28,7 +30,7 @@ func (groups *Group) Get() *errors.RestErr {
 	defer stmt.Close()
 
 	result := stmt.QueryRow(groups.ID)
-	if err := result.Scan(&groups.ID, &groups.GroupName, &groups.DateCreated); err != nil {
+	if err := result.Scan(&groups.ID, &groups.GroupName, &groups.Privileges, &groups.DateCreated); err != nil {
 		if strings.Contains(err.Error(), errorNoRows) {
 			return errors.NewNotFound(
 				fmt.Sprintf("group %d not found", groups.ID))
@@ -49,10 +51,9 @@ func (groups *Group) Save() *errors.RestErr {
 		return errors.NewInternalServerError(err.Error())
 	}
 	defer stmt.Close()
-	fmt.Println("jebany nie działa")
 	groups.DateCreated = date_utils.GetNowString()
 
-	insertResult, err := stmt.Exec(groups.GroupName, groups.DateCreated)
+	insertResult, err := stmt.Exec(groups.GroupName, groups.DateCreated, groups.Privileges)
 	if err != nil {
 		if strings.Contains(err.Error(), indexUniqueName) {
 			return errors.NewBadRequest(
@@ -70,5 +71,32 @@ func (groups *Group) Save() *errors.RestErr {
 
 	groups.ID = groupID
 
+	return nil
+}
+
+//Update - updating group info
+func (groups *Group) Update() *errors.RestErr {
+	stmt, err := users_db.Client.Prepare(queryUpdateGroup)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(groups.GroupName, groups.Privileges, groups.ID)
+	if err != nil {
+		return errors.NewInternalServerError(fmt.Sprintf("%s", err))
+	}
+	return nil
+}
+func (groups *Group) Delete() *errors.RestErr {
+	stmt, err := users_db.Client.Prepare(queryDeleteGroup)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	if _, err = stmt.Exec(groups.ID); err != nil {
+		return errors.NewInternalServerError(fmt.Sprintf("%s", err)) //TODO mysql_utils - error MYSQL error handling
+	}
 	return nil
 }

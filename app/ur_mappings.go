@@ -9,10 +9,13 @@ import (
 func mapUrls() {
 	router.GET("/ping", ping.Ping)
 
-	router.GET("/users/:user_id", users.GetUser)
+	router.GET("/users/:user_id", users.Get)
 	//router.GET("users/search", controllers.SearchUser)
-	router.POST("/users", users.CreateUser)
-	router.POST("/groups", groups.CreateGroup)
-	router.GET("/groups/:group_id", groups.GetGroup)
-	router.PATCH("/users/:user_id", users.UpdateUser) //PATH check difference
+	router.POST("/users", users.Create)
+	router.POST("/groups", groups.Create)
+	router.GET("/groups/:group_id", groups.Get)
+	router.PATCH("/users/:user_id", users.Update)
+	router.PATCH("/groups/:group_id", groups.Update)
+	router.DELETE("/users/:user_id", users.Delete)
+	router.DELETE("/groups/:group_id", groups.Delete)
 }

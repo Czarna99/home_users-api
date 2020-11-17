@@ -11,7 +11,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetGroup(c *gin.Context) {
+func getGroupID(groupIDParam string) (int64, *errors.RestErr) {
+	groupID, groupErr := strconv.ParseInt(groupIDParam, 10, 64)
+	if groupErr != nil {
+		return 0, errors.NewBadRequest("invalid ID - Should be a number.")
+	}
+	return groupID, nil
+
+}
+
+func Get(c *gin.Context) {
 	groupID, groupErr := strconv.ParseInt(c.Param("group_id"), 10, 64)
 	if groupErr != nil {
 		err := errors.NewBadRequest("invalid group id - should be a number")
@@ -27,7 +36,7 @@ func GetGroup(c *gin.Context) {
 
 }
 
-func CreateGroup(c *gin.Context) {
+func Create(c *gin.Context) {
 	var group groups.Group
 	if err := c.ShouldBindJSON(&group); err != nil {
 		restErr := errors.NewBadRequest("Invalid data")
@@ -41,4 +50,44 @@ func CreateGroup(c *gin.Context) {
 
 	fmt.Println(group)
 	c.JSON(http.StatusCreated, result)
+}
+
+func Update(c *gin.Context) {
+	groupID, groupErr := strconv.ParseInt(c.Param("group_id"), 10, 64)
+	fmt.Printf("%d", groupID)
+	if groupErr != nil {
+		err := errors.NewBadRequest("Invalid group ID")
+		c.JSON(err.Code, err)
+		fmt.Println("SSIJ")
+		return
+	}
+
+	var group groups.Group
+	if err := c.ShouldBindJSON(&group); err != nil {
+		restErr := errors.NewBadRequest("Invalid data")
+		c.JSON(restErr.Code, restErr)
+
+		return
+	}
+	group.ID = groupID
+
+	isPartial := c.Request.Method == http.MethodPatch
+
+	result, err := services.UpdateGroup(isPartial, group)
+	if err != nil {
+		c.JSON(err.Code, err)
+		return
+	}
+	c.JSON(http.StatusOK, result)
+}
+func Delete(c *gin.Context) {
+
+	groupID, groupErr := getGroupID(c.Param("group_id"))
+	if groupErr != nil {
+		c.JSON(groupErr.Code, groupErr)
+	}
+	if err := services.DeleteGroup(groupID); err != nil {
+		c.JSON(err.Code, err)
+	}
+	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
 }
