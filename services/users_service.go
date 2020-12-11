@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Pawelek242/home_users-api/domain/users"
+	"github.com/Pawelek242/home_users-api/utils/date_utils"
 	"github.com/Pawelek242/home_users-api/utils/errors"
 )
 
@@ -18,7 +19,12 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
+	if err := user.CheckPassword(); err != nil {
+		return nil, err
+	}
 
+	user.Status = users.StatusActive
+	user.DateCreated = date_utils.GetNowDBFormat()
 	if err := user.Save(); err != nil {
 		return nil, err
 	}
@@ -41,10 +47,10 @@ func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) 
 		if user.Email != "" {
 			current.Email = user.Email
 		}
-	} else {
+		/*else {
 		if err := user.Validate(); err != nil {
 			return nil, err
-		}
+		}*/
 		current.FirstName = user.FirstName
 		current.LastName = user.LastName
 		current.Email = user.Email
@@ -60,4 +66,8 @@ func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) 
 func DeleteUser(userID int64) *errors.RestErr {
 	user := &users.User{ID: userID}
 	return user.Delete()
+}
+func Search(status string) ([]users.User, *errors.RestErr) {
+	dao := &users.User{}
+	return dao.FindByStatus(status)
 }

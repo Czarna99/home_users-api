@@ -12,18 +12,20 @@ import (
 )
 
 func getGroupID(groupIDParam string) (int64, *errors.RestErr) {
+	var error []string
 	groupID, groupErr := strconv.ParseInt(groupIDParam, 10, 64)
 	if groupErr != nil {
-		return 0, errors.NewBadRequest("invalid ID - Should be a number.")
+		return 0, errors.NewBadRequest(append(error, "invalid ID - Should be a number."))
 	}
 	return groupID, nil
 
 }
 
 func Get(c *gin.Context) {
+	var error []string
 	groupID, groupErr := strconv.ParseInt(c.Param("group_id"), 10, 64)
 	if groupErr != nil {
-		err := errors.NewBadRequest("invalid group id - should be a number")
+		err := errors.NewBadRequest(append(error, "invalid group id - should be a number"))
 		c.JSON(err.Code, err)
 		return
 	}
@@ -37,9 +39,10 @@ func Get(c *gin.Context) {
 }
 
 func Create(c *gin.Context) {
+	var error []string
 	var group groups.Group
 	if err := c.ShouldBindJSON(&group); err != nil {
-		restErr := errors.NewBadRequest("Invalid data")
+		restErr := errors.NewBadRequest(append(error, "Invalid data"))
 		c.JSON(restErr.Code, restErr)
 	}
 	result, saveErr := services.CreateGroup(group)
@@ -53,10 +56,11 @@ func Create(c *gin.Context) {
 }
 
 func Update(c *gin.Context) {
+	var error []string
 	groupID, groupErr := strconv.ParseInt(c.Param("group_id"), 10, 64)
 	fmt.Printf("%d", groupID)
 	if groupErr != nil {
-		err := errors.NewBadRequest("Invalid group ID")
+		err := errors.NewBadRequest(append(error, "Invalid group ID"))
 		c.JSON(err.Code, err)
 		fmt.Println("SSIJ")
 		return
@@ -64,7 +68,7 @@ func Update(c *gin.Context) {
 
 	var group groups.Group
 	if err := c.ShouldBindJSON(&group); err != nil {
-		restErr := errors.NewBadRequest("Invalid data")
+		restErr := errors.NewBadRequest(append(error, "Invalid data"))
 		c.JSON(restErr.Code, restErr)
 
 		return

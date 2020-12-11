@@ -18,4 +18,5 @@ func mapUrls() {
 	router.PATCH("/groups/:group_id", groups.Update)
 	router.DELETE("/users/:user_id", users.Delete)
 	router.DELETE("/groups/:group_id", groups.Delete)
+	router.GET("/internal/users/search", users.Search)
 }

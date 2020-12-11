@@ -1,9 +1,15 @@
 package users
 
 import (
+	"fmt"
 	"strings"
+	"unicode"
 
 	"github.com/Pawelek242/home_users-api/utils/errors"
+)
+
+const (
+	StatusActive = "active"
 )
 
 //User - user struct
@@ -14,6 +20,8 @@ type User struct {
 	Email       string `json:"email"`
 	DateCreated string `json:"date_created"`
 	Privileges  string `json:"privileges"`
+	Status      string `json:"status"`
+	Password    string `json:"password"`
 }
 
 //Global - global struct
@@ -32,15 +40,66 @@ func (user *User) Validate() *errors.RestErr {
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
 	user.FirstName = strings.TrimSpace(user.FirstName)
 	user.LastName = strings.TrimSpace(user.LastName)
+	var err []string
 	if user.Email == "" {
-		return errors.NewBadRequest("invalid email adress")
+		return errors.NewInternalServerError(append(err, "Email field cannot be empty"))
 	}
 	if user.FirstName == "" {
-		return errors.NewBadRequest("Name field shouldn't be empty.")
+		return errors.NewInternalServerError(append(err, "Name field shouldn't be empty."))
 	}
 	if user.LastName == "" {
-		return errors.NewBadRequest("Lastname field shouldn't be empty.")
+		return errors.NewInternalServerError(append(err, "Lastname field shouldn't be empty."))
 	}
+	/*user.Password = strings.TrimSpace(user.Password)
+	if user.Password == "" || len(user.Password) <= 6 {
+		return errors.NewBadRequest("Invalid password.")
+	}*/
 	return nil
+}
+func (user *User) CheckPassword() *errors.RestErr {
+
+	var uppercasePresent bool
+	var lowercasePresent bool
+	var numberPresent bool
+	var specialCharPresent bool
+	const minPassLength = 8
+	const maxPassLength = 64
+	var passLen int
+	var err []string
+
+	user.Password = strings.TrimSpace(user.Password)
+	for _, ch := range user.Password {
+		switch {
+		case unicode.IsNumber(ch):
+			numberPresent = true
+		case unicode.IsUpper(ch):
+			uppercasePresent = true
+		case unicode.IsLower(ch):
+			lowercasePresent = true
+		case unicode.IsPunct(ch) || unicode.IsSymbol(ch):
+			specialCharPresent = true
+		case ch == ' ':
+		}
+		passLen++
+	}
+
+	if !lowercasePresent {
+
+		err = append(err, "Lowercase letter missing.")
+	}
+	if !uppercasePresent {
+		err = append(err, "Uppercase letter missing.")
+	}
+	if !numberPresent {
+		err = append(err, "At least one numeric character required.")
+	}
+	if !specialCharPresent {
+		err = append(err, "Special character missing.") //TODO special characters jakie
+	}
+	if !(minPassLength <= passLen && passLen <= maxPassLength) {
+		err = append(err, fmt.Sprintf("Password length must be between %d to %d characters long.", minPassLength, maxPassLength))
+	}
+
+	return errors.NewInternalServerError(err)
 
 }

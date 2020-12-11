@@ -14,11 +14,13 @@ type Group struct {
 	DateCreated string `json:"date_created"`
 }
 
+//Validate - group validation
 func (groups *Group) Validate() *errors.RestErr {
+	var error []string
 	groups.GroupName = strings.TrimSpace(strings.ToLower(groups.GroupName))
 
 	if groups.GroupName == "" {
-		return errors.NewBadRequest("Invalid group name")
+		return errors.NewBadRequest(append(error, "Invalid group name"))
 	}
 	return nil
 }

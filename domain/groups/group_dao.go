@@ -23,21 +23,20 @@ var ()
 
 //Get - get group from database
 func (groups *Group) Get() *errors.RestErr {
+	var error []string
 	stmt, err := users_db.Client.Prepare(queryGetGroup)
 	if err != nil {
-		return errors.NewInternalServerError(err.Error())
+		return errors.NewInternalServerError(append(error, err.Error()))
 	}
 	defer stmt.Close()
 
 	result := stmt.QueryRow(groups.ID)
 	if err := result.Scan(&groups.ID, &groups.GroupName, &groups.Privileges, &groups.DateCreated); err != nil {
 		if strings.Contains(err.Error(), errorNoRows) {
-			return errors.NewNotFound(
-				fmt.Sprintf("group %d not found", groups.ID))
+			return errors.NewNotFound(append(error, fmt.Sprintf("group %d not found", groups.ID)))
 
 		}
-		return errors.NewInternalServerError(
-			fmt.Sprintf("error when trying to get user %d: %s", groups.ID, err.Error()))
+		return errors.NewInternalServerError(append(error, fmt.Sprintf("error when trying to get user %d: %s", groups.ID, err.Error())))
 
 	}
 	return nil
@@ -45,10 +44,11 @@ func (groups *Group) Get() *errors.RestErr {
 
 //Save - Saving user data into database
 func (groups *Group) Save() *errors.RestErr {
+	var error []string
 
 	stmt, err := users_db.Client.Prepare(queryInsertGroup)
 	if err != nil {
-		return errors.NewInternalServerError(err.Error())
+		return errors.NewInternalServerError(append(error, err.Error()))
 	}
 	defer stmt.Close()
 	groups.DateCreated = date_utils.GetNowString()
@@ -56,17 +56,14 @@ func (groups *Group) Save() *errors.RestErr {
 	insertResult, err := stmt.Exec(groups.GroupName, groups.DateCreated, groups.Privileges)
 	if err != nil {
 		if strings.Contains(err.Error(), indexUniqueName) {
-			return errors.NewBadRequest(
-				fmt.Sprintf("Group name %s already exist", groups.GroupName))
+			return errors.NewBadRequest(append(error, fmt.Sprintf("Group name %s already exist", groups.GroupName)))
 		}
-		return errors.NewInternalServerError(
-			fmt.Sprintf("error when trying to save group: %s", err.Error()))
+		return errors.NewInternalServerError(append(error, fmt.Sprintf("error when trying to save group: %s", err.Error())))
 	}
 
 	groupID, err := insertResult.LastInsertId()
 	if err != nil {
-		return errors.NewInternalServerError(
-			fmt.Sprintf("error when trying to save group: %s ", err.Error()))
+		return errors.NewInternalServerError(append(error, fmt.Sprintf("error when trying to save group: %s ", err.Error())))
 	}
 
 	groups.ID = groupID
@@ -76,27 +73,31 @@ func (groups *Group) Save() *errors.RestErr {
 
 //Update - updating group info
 func (groups *Group) Update() *errors.RestErr {
+	var error []string
 	stmt, err := users_db.Client.Prepare(queryUpdateGroup)
 	if err != nil {
-		return errors.NewInternalServerError(err.Error())
+		return errors.NewInternalServerError(append(error, err.Error()))
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(groups.GroupName, groups.Privileges, groups.ID)
 	if err != nil {
-		return errors.NewInternalServerError(fmt.Sprintf("%s", err))
+		return errors.NewInternalServerError(append(error, fmt.Sprintf("%s", err)))
 	}
 	return nil
 }
+
+//Delete - deleting groups
 func (groups *Group) Delete() *errors.RestErr {
+	var error []string
 	stmt, err := users_db.Client.Prepare(queryDeleteGroup)
 	if err != nil {
-		return errors.NewInternalServerError(err.Error())
+		return errors.NewInternalServerError(append(error, err.Error()))
 	}
 	defer stmt.Close()
 
 	if _, err = stmt.Exec(groups.ID); err != nil {
-		return errors.NewInternalServerError(fmt.Sprintf("%s", err)) //TODO mysql_utils - error MYSQL error handling
+		return errors.NewInternalServerError(append(error, fmt.Sprintf("%s", err))) //TODO mysql_utils - error MYSQL error handling
 	}
 	return nil
 }

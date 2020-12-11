@@ -12,9 +12,10 @@ import (
 )
 
 func getUserId(userIdParam string) (int64, *errors.RestErr) {
+	var error []string
 	userID, userErr := strconv.ParseInt(userIdParam, 10, 64)
 	if userErr != nil {
-		return 0, errors.NewBadRequest("invalid user id - should be a number")
+		return 0, errors.NewBadRequest(append(error, "invalid user id - should be a number"))
 
 	}
 	return userID, nil
@@ -35,9 +36,13 @@ func Get(c *gin.Context) {
 }
 
 func Create(c *gin.Context) {
-	var user users.User
+
+	var (
+		user  users.User
+		error []string
+	)
 	if err := c.ShouldBindJSON(&user); err != nil {
-		restErr := errors.NewBadRequest("Invalid data")
+		restErr := errors.NewBadRequest(append(error, "Invalid data"))
 		c.JSON(restErr.Code, restErr)
 	}
 	result, saveErr := services.CreateUser(user)
@@ -52,6 +57,7 @@ func Create(c *gin.Context) {
 
 //UpdateUser - function for update user
 func Update(c *gin.Context) {
+	var error []string
 	userID, idErr := getUserId(c.Param("user_id"))
 	if idErr != nil {
 		c.JSON(idErr.Code, idErr)
@@ -59,7 +65,7 @@ func Update(c *gin.Context) {
 	}
 	var user users.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		restErr := errors.NewBadRequest("Invalid data")
+		restErr := errors.NewBadRequest(append(error, "Invalid data"))
 		c.JSON(restErr.Code, restErr)
 		return
 	}
@@ -86,4 +92,16 @@ func Delete(c *gin.Context) {
 		c.JSON(err.Code, err)
 	}
 	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
+}
+
+func Search(c *gin.Context) {
+	status := c.Query("status")
+
+	users, err := services.Search(status)
+	if err != nil {
+		c.JSON(err.Code, err)
+		return
+	}
+	c.JSON(http.StatusOK, users)
+
 }
