@@ -47,8 +47,9 @@ func (user *User) Get() *errors.RestErr {
 //Save - Saving user data into database
 func (user *User) Save() *errors.RestErr {
 	var error []string
+
 	stmt, err := users_db.Client.Prepare(queryInsertUser)
-	fmt.Println("nie dziala jebany")
+
 	if err != nil {
 		return errors.NewInternalServerError(append(error, err.Error()))
 	}

@@ -2,6 +2,8 @@ package users
 
 import (
 	"fmt"
+	"net"
+	"regexp"
 	"strings"
 	"unicode"
 
@@ -11,6 +13,8 @@ import (
 const (
 	StatusActive = "active"
 )
+
+var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 //User - user struct
 type User struct {
@@ -35,14 +39,30 @@ type Global struct {
 	deleted string
 }
 
+func isEmailValid(e string) bool {
+	if len(e) < 3 && len(e) > 254 {
+		return false
+	}
+	if !emailRegex.MatchString(e) {
+		return false
+	}
+	parts := strings.Split(e, "@")
+	mx, err := net.LookupMX(parts[1])
+	if err != nil || len(mx) == 0 {
+		return false
+	}
+	return true
+}
+
 //Validate - validating data provided into database
 func (user *User) Validate() *errors.RestErr {
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
 	user.FirstName = strings.TrimSpace(user.FirstName)
 	user.LastName = strings.TrimSpace(user.LastName)
 	var err []string
-	if user.Email == "" {
-		return errors.NewInternalServerError(append(err, "Email field cannot be empty"))
+
+	if a := user.Email; !isEmailValid(a) {
+		return errors.NewInternalServerError(append(err, fmt.Sprintf("%v is not valid email adress.", a)))
 	}
 	if user.FirstName == "" {
 		return errors.NewInternalServerError(append(err, "Name field shouldn't be empty."))
