@@ -6,7 +6,7 @@ services:
       - '0.0.0.0:8080:8080'
     depends_on:
       - users_db
-    env_file: ./.env
+    env_file: .env
 
   users_db:
     image: mysql
