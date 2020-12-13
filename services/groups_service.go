@@ -9,7 +9,7 @@ import (
 
 func GetGroup(groupID int64) (*groups.Group, *errors.RestErr) {
 	result := &groups.Group{ID: groupID}
-	if err := result.Get(); err != nil {
+	if err := result.GetGroup(); err != nil {
 		return nil, err
 	}
 	return result, nil
@@ -19,7 +19,7 @@ func CreateGroup(groups groups.Group) (*groups.Group, *errors.RestErr) {
 		return nil, err
 	}
 
-	if err := groups.Save(); err != nil {
+	if err := groups.SaveGroup(); err != nil {
 		return nil, err
 	}
 	return &groups, nil
@@ -45,7 +45,7 @@ func UpdateGroup(isPartial bool, groups groups.Group) (*groups.Group, *errors.Re
 	}
 	fmt.Printf("%s", current.GroupName)
 	fmt.Printf("%s", current.Privileges)
-	if err := current.Update(); err != nil {
+	if err := current.UpdateGroup(); err != nil {
 		return nil, err
 	}
 	return current, nil
@@ -53,5 +53,5 @@ func UpdateGroup(isPartial bool, groups groups.Group) (*groups.Group, *errors.Re
 }
 func DeleteGroup(groupID int64) *errors.RestErr {
 	group := &groups.Group{ID: groupID}
-	return group.Delete()
+	return group.DeleteGroup()
 }

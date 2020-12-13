@@ -21,8 +21,8 @@ const (
 
 var ()
 
-//Get - get group from database
-func (groups *Group) Get() *errors.RestErr {
+//GetGroup - get group from database
+func (groups *Group) GetGroup() *errors.RestErr {
 	var error []string
 	stmt, err := users_db.Client.Prepare(queryGetGroup)
 	if err != nil {
@@ -42,8 +42,8 @@ func (groups *Group) Get() *errors.RestErr {
 	return nil
 }
 
-//Save - Saving user data into database
-func (groups *Group) Save() *errors.RestErr {
+//SaveGroup - Saving user data into database
+func (groups *Group) SaveGroup() *errors.RestErr {
 	var error []string
 
 	stmt, err := users_db.Client.Prepare(queryInsertGroup)
@@ -71,8 +71,8 @@ func (groups *Group) Save() *errors.RestErr {
 	return nil
 }
 
-//Update - updating group info
-func (groups *Group) Update() *errors.RestErr {
+//UpdateGroup - updating group info
+func (groups *Group) UpdateGroup() *errors.RestErr {
 	var error []string
 	stmt, err := users_db.Client.Prepare(queryUpdateGroup)
 	if err != nil {
@@ -87,8 +87,8 @@ func (groups *Group) Update() *errors.RestErr {
 	return nil
 }
 
-//Delete - deleting groups
-func (groups *Group) Delete() *errors.RestErr {
+//DeleteGroup - function for deleting group i database
+func (groups *Group) DeleteGroup() *errors.RestErr {
 	var error []string
 	stmt, err := users_db.Client.Prepare(queryDeleteGroup)
 	if err != nil {

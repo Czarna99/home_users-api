@@ -21,7 +21,8 @@ func getGroupID(groupIDParam string) (int64, *errors.RestErr) {
 
 }
 
-func Get(c *gin.Context) {
+//GetGroup - function for get group from database
+func GetGroup(c *gin.Context) {
 	var error []string
 	groupID, groupErr := strconv.ParseInt(c.Param("group_id"), 10, 64)
 	if groupErr != nil {
@@ -38,7 +39,8 @@ func Get(c *gin.Context) {
 
 }
 
-func Create(c *gin.Context) {
+// CreateGroup - function for create group in database
+func CreateGroup(c *gin.Context) {
 	var error []string
 	var group groups.Group
 	if err := c.ShouldBindJSON(&group); err != nil {
@@ -56,7 +58,8 @@ func Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, result)
 }
 
-func Update(c *gin.Context) {
+//UpdateGroup - function for updating group information in database
+func UpdateGroup(c *gin.Context) {
 	var error []string
 	groupID, groupErr := strconv.ParseInt(c.Param("group_id"), 10, 64)
 	fmt.Printf("%d", groupID)
@@ -85,7 +88,9 @@ func Update(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, result)
 }
-func Delete(c *gin.Context) {
+
+//DeleteGroup - function for deleting group from database
+func DeleteGroup(c *gin.Context) {
 
 	groupID, groupErr := getGroupID(c.Param("group_id"))
 	if groupErr != nil {
