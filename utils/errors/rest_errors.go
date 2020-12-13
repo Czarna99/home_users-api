@@ -7,11 +7,6 @@ type RestErr struct {
 	Code    int      `json:"code"`
 	Error   string   `json:"error"`
 }
-type AuthErr struct {
-	Message []string `json:"message"`
-	Code    int      `json:"code"`
-	Error   string   `json:"error'`
-}
 
 func NewBadRequest(message []string) *RestErr {
 	return &RestErr{
@@ -37,10 +32,10 @@ func NewInternalServerError(message []string) *RestErr {
 }
 
 //NewAuthError - error handling for password rules, showed in slices
-func NewAuthError(message []string) *AuthErr {
-	return &AuthErr{
+func PassError(message []string) *RestErr {
+	return &RestErr{
 		Message: message,
 		Code:    http.StatusInternalServerError,
-		Error:   "internal_server_error",
+		Error:   "password_error",
 	}
 }

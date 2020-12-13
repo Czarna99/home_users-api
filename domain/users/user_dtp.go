@@ -50,10 +50,9 @@ func (user *User) Validate() *errors.RestErr {
 	if user.LastName == "" {
 		return errors.NewInternalServerError(append(err, "Lastname field shouldn't be empty."))
 	}
-	/*user.Password = strings.TrimSpace(user.Password)
-	if user.Password == "" || len(user.Password) <= 6 {
-		return errors.NewBadRequest("Invalid password.")
-	}*/
+	if err != nil {
+		return errors.NewInternalServerError(err)
+	}
 	return nil
 }
 func (user *User) CheckPassword() *errors.RestErr {
@@ -99,7 +98,9 @@ func (user *User) CheckPassword() *errors.RestErr {
 	if !(minPassLength <= passLen && passLen <= maxPassLength) {
 		err = append(err, fmt.Sprintf("Password length must be between %d to %d characters long.", minPassLength, maxPassLength))
 	}
-
-	return errors.NewInternalServerError(err)
+	if err != nil {
+		return errors.PassError(err)
+	}
+	return nil
 
 }

@@ -44,6 +44,7 @@ func Create(c *gin.Context) {
 	if err := c.ShouldBindJSON(&group); err != nil {
 		restErr := errors.NewBadRequest(append(error, "Invalid data"))
 		c.JSON(restErr.Code, restErr)
+		return
 	}
 	result, saveErr := services.CreateGroup(group)
 	if saveErr != nil {
@@ -62,7 +63,7 @@ func Update(c *gin.Context) {
 	if groupErr != nil {
 		err := errors.NewBadRequest(append(error, "Invalid group ID"))
 		c.JSON(err.Code, err)
-		fmt.Println("SSIJ")
+
 		return
 	}
 
