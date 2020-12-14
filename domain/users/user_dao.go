@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Pawelek242/home_users-api/dataresources/mysql/users_db"
+	"github.com/Pawelek242/home_users-api/logger"
 	"github.com/Pawelek242/home_users-api/utils/date_utils"
 	"github.com/Pawelek242/home_users-api/utils/errors"
 )
@@ -13,7 +14,7 @@ const (
 	errorNoRows           = "no rows in result set"
 	indexUniqueEmail      = "email_UNIQUE"
 	queryInsertUser       = "INSERT INTO users(first_name, last_name, email, date_created, status, password) VALUES(?, ?, ?, ?, ?, ?);"
-	queryGetUser          = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?"
+	queryGetUser          = "SELEC id, first_name, last_name, email, date_created FROM users WHERE id=?"
 	queryUpdateUser       = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
 	queryDeleteUser       = "DELETE FROM users WHERE id=?"
 	queryFindUserByStatus = "SELECT id, first_name, last_Name, email, date_created, status FROM users WHERE status=?;"
@@ -28,18 +29,17 @@ func (user *User) Get() *errors.RestErr {
 	var error []string
 	stmt, err := users_db.Client.Prepare(queryGetUser)
 	if err != nil {
-		return errors.NewInternalServerError(append(error, "%s", err.Error()))
+		logger.Error("error when trying to prepare get user statement", err)
+		return errors.NewInternalServerError(append(error, "Database error"))
 	}
 	defer stmt.Close()
 
 	result := stmt.QueryRow(user.ID)
 	if err := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); err != nil {
 		if strings.Contains(err.Error(), errorNoRows) {
-			return errors.NewNotFound(append(error, fmt.Sprintf("user %d not found", user.ID)))
-
+			logger.Error("error when trying to get user by ID", err)
+			return errors.NewInternalServerError(append(error, "Database error"))
 		}
-		return errors.NewInternalServerError(append(error, fmt.Sprintf("error when trying to get user %d: %s", user.ID, err.Error())))
-
 	}
 	return nil
 }
@@ -51,7 +51,8 @@ func (user *User) Save() *errors.RestErr {
 	stmt, err := users_db.Client.Prepare(queryInsertUser)
 
 	if err != nil {
-		return errors.NewInternalServerError(append(error, err.Error()))
+		logger.Error("error when trying to prepare save user statement", err)
+		return errors.NewInternalServerError(append(error, "Database error"))
 	}
 
 	defer stmt.Close()
