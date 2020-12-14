@@ -28,6 +28,8 @@ type User struct {
 	Password    string `json:"password"`
 }
 
+type Users []User
+
 //Global - global struct
 type Global struct {
 	updatedBy string
