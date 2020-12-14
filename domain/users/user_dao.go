@@ -14,7 +14,7 @@ const (
 	errorNoRows           = "no rows in result set"
 	indexUniqueEmail      = "email_UNIQUE"
 	queryInsertUser       = "INSERT INTO users(first_name, last_name, email, date_created, status, password) VALUES(?, ?, ?, ?, ?, ?);"
-	queryGetUser          = "SELEC id, first_name, last_name, email, date_created FROM users WHERE id=?"
+	queryGetUser          = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?"
 	queryUpdateUser       = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
 	queryDeleteUser       = "DELETE FROM users WHERE id=?"
 	queryFindUserByStatus = "SELECT id, first_name, last_Name, email, date_created, status FROM users WHERE status=?;"
