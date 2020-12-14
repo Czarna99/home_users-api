@@ -4,6 +4,10 @@ var (
 	ItemsService itemsService = itemsService{}
 )
 
+type itemsServiceInterface interface {
+	GetItem()
+	SaveItem()
+}
 type itemsService struct {
 }
 

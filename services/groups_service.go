@@ -7,14 +7,27 @@ import (
 	"github.com/Pawelek242/home_users-api/utils/errors"
 )
 
-func GetGroup(groupID int64) (*groups.Group, *errors.RestErr) {
+var (
+	GroupService groupServiceInterface = &groupService{}
+)
+
+type groupService struct {
+}
+type groupServiceInterface interface {
+	GetGroup(int64) (*groups.Group, *errors.RestErr)
+	CreateGroup(groups.Group) (*groups.Group, *errors.RestErr)
+	UpdateGroup(bool, groups.Group) (*groups.Group, *errors.RestErr)
+	DeleteGroup(int64) *errors.RestErr
+}
+
+func (s *groupService) GetGroup(groupID int64) (*groups.Group, *errors.RestErr) {
 	result := &groups.Group{ID: groupID}
 	if err := result.GetGroup(); err != nil {
 		return nil, err
 	}
 	return result, nil
 }
-func CreateGroup(groups groups.Group) (*groups.Group, *errors.RestErr) {
+func (s *groupService) CreateGroup(groups groups.Group) (*groups.Group, *errors.RestErr) {
 	if err := groups.Validate(); err != nil {
 		return nil, err
 	}
@@ -24,8 +37,8 @@ func CreateGroup(groups groups.Group) (*groups.Group, *errors.RestErr) {
 	}
 	return &groups, nil
 }
-func UpdateGroup(isPartial bool, groups groups.Group) (*groups.Group, *errors.RestErr) {
-	current, err := GetGroup(groups.ID)
+func (s *groupService) UpdateGroup(isPartial bool, groups groups.Group) (*groups.Group, *errors.RestErr) {
+	current, err := GroupService.GetGroup(groups.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +64,7 @@ func UpdateGroup(isPartial bool, groups groups.Group) (*groups.Group, *errors.Re
 	return current, nil
 
 }
-func DeleteGroup(groupID int64) *errors.RestErr {
+func (s *groupService) DeleteGroup(groupID int64) *errors.RestErr {
 	group := &groups.Group{ID: groupID}
 	return group.DeleteGroup()
 }

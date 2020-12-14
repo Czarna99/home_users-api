@@ -30,7 +30,7 @@ func GetGroup(c *gin.Context) {
 		c.JSON(err.Code, err)
 		return
 	}
-	group, getErr := services.GetGroup(groupID)
+	group, getErr := services.GroupService.GetGroup(groupID)
 	if getErr != nil {
 		c.JSON(getErr.Code, getErr)
 		return
@@ -48,7 +48,7 @@ func CreateGroup(c *gin.Context) {
 		c.JSON(restErr.Code, restErr)
 		return
 	}
-	result, saveErr := services.CreateGroup(group)
+	result, saveErr := services.GroupService.CreateGroup(group)
 	if saveErr != nil {
 		c.JSON(saveErr.Code, saveErr)
 		return
@@ -81,7 +81,7 @@ func UpdateGroup(c *gin.Context) {
 
 	isPartial := c.Request.Method == http.MethodPatch
 
-	result, err := services.UpdateGroup(isPartial, group)
+	result, err := services.GroupService.UpdateGroup(isPartial, group)
 	if err != nil {
 		c.JSON(err.Code, err)
 		return
@@ -96,7 +96,7 @@ func DeleteGroup(c *gin.Context) {
 	if groupErr != nil {
 		c.JSON(groupErr.Code, groupErr)
 	}
-	if err := services.DeleteGroup(groupID); err != nil {
+	if err := services.GroupService.DeleteGroup(groupID); err != nil {
 		c.JSON(err.Code, err)
 	}
 	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
