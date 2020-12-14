@@ -16,7 +16,6 @@ func getUserId(userIdParam string) (int64, *errors.RestErr) {
 	userID, userErr := strconv.ParseInt(userIdParam, 10, 64)
 	if userErr != nil {
 		return 0, errors.NewBadRequest(append(error, "invalid user id - should be a number"))
-
 	}
 	return userID, nil
 }
@@ -26,7 +25,7 @@ func Get(c *gin.Context) {
 		c.JSON(idErr.Code, idErr)
 		return
 	}
-	user, getErr := services.GetUser(userID)
+	user, getErr := services.UsersService.GetUser(userID)
 	if getErr != nil {
 		c.JSON(getErr.Code, getErr)
 		return
@@ -45,7 +44,7 @@ func Create(c *gin.Context) {
 		restErr := errors.NewBadRequest(append(error, "Invalid data"))
 		c.JSON(restErr.Code, restErr)
 	}
-	result, saveErr := services.CreateUser(user)
+	result, saveErr := services.UsersService.CreateUser(user)
 	if saveErr != nil {
 		c.JSON(saveErr.Code, saveErr)
 		return
@@ -73,7 +72,7 @@ func Update(c *gin.Context) {
 
 	isPartial := c.Request.Method == http.MethodPatch
 
-	result, err := services.UpdateUser(isPartial, user)
+	result, err := services.UsersService.UpdateUser(isPartial, user)
 	if err != nil {
 		c.JSON(err.Code, err)
 		return
@@ -88,7 +87,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	if err := services.DeleteUser(userID); err != nil {
+	if err := services.UsersService.DeleteUser(userID); err != nil {
 		c.JSON(err.Code, err)
 	}
 	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
@@ -97,7 +96,7 @@ func Delete(c *gin.Context) {
 func Search(c *gin.Context) {
 	status := c.Query("status")
 
-	users, err := services.Search(status)
+	users, err := services.UsersService.Search(status)
 	if err != nil {
 		c.JSON(err.Code, err)
 		return
