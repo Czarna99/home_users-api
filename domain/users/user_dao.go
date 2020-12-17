@@ -81,7 +81,7 @@ func (user *User) Save() *errors.RestErr {
 
 	user.DateCreated = date_utils.GetNowDBFormat()
 
-	insertResult, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated, user.Status, user.DateCreated)
+	insertResult, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated, user.Status, user.Password)
 	if err != nil {
 		if strings.Contains(err.Error(), indexUniqueEmail) {
 			return errors.NewBadRequest(append(error, fmt.Sprintf("email %s is already used", user.Email)))
