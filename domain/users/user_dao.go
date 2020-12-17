@@ -86,13 +86,14 @@ func (user *User) Save() *errors.RestErr {
 		if strings.Contains(err.Error(), indexUniqueEmail) {
 			return errors.NewBadRequest(append(error, fmt.Sprintf("email %s is already used", user.Email)))
 		}
-
-		return errors.NewInternalServerError(append(error, fmt.Sprintf("error when trying to save user: %s", err.Error())))
+		logger.Error("error when trying save new user", err)
+		return errors.NewInternalServerError(append(error, "Database error"))
 	}
 
 	userID, err := insertResult.LastInsertId()
 	if err != nil {
-		return errors.NewInternalServerError(append(error, fmt.Sprintf("error when trying to save user: %s ", err.Error())))
+		logger.Error("error when trying to save user", err)
+		return errors.NewInternalServerError(append(error, "Database error"))
 	}
 
 	user.ID = userID
