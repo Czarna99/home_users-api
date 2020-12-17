@@ -48,6 +48,28 @@ func (user *User) Get() *errors.RestErr {
 func (user *User) Save() *errors.RestErr {
 	var error []string
 
+	// GENERATE TABLES EXAMPLE
+	// TODO: Clean this up as you like please.
+	// TODO: Create generation for other tables as well.
+	queryInsertUserTable := `CREATE TABLE IF NOT EXISTS users(
+		id int primary key auto_increment,
+		first_name text,
+		last_name text,
+		email text,
+		status text,
+		password text,
+		privileges text,
+		date_created text
+	);`
+	asd, err := users_db.Client.Prepare(queryInsertUserTable)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("CREATED users TABLE SUCESSFULY DYNAMICALLY")
+	}
+	defer asd.Close()
+	// 
+
 	stmt, err := users_db.Client.Prepare(queryInsertUser)
 
 	if err != nil {
